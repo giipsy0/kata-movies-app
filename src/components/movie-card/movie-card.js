@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/destructuring-assignment */
 import { Col, Image, Rate } from 'antd'
 import PropTypes from 'prop-types'

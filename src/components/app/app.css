@@ -1,78 +1,49 @@
-@import 'antd/dist/reset.css';
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: #f7f7f7;
+* {
+  box-sizing: border-box;
 }
 
-.app {
-  max-width: 1010px;
-  width: 100%;
-  background-color: white;
-  margin: 0 auto;
-  padding: 0 2rem 2rem;
-  display: flex;
-  flex-direction: column;
-}
-
-@media (max-width: 460px) {
-  .app {
-    padding: 0 1rem 1rem;
-  }
-}
-
-.warning {
-  margin-bottom: 20px;
-}
-
-.error {
-  margin: 100px auto;
-  width: 800px;
-}
-
-.pagination {
+.wrapper {
+  width: 100vw;
   display: flex;
   justify-content: center;
-  margin-top: 40px;
-  margin: 10px !important;
+  align-items: center;
 }
 
-.pagination li {
-  border: none;
-  font-size: 12px;
-  line-height: 22px;
-  min-width: 26px;
-  height: 26px;
+.main {
+  width: 940px;
+  display: grid;
+  grid-template-columns: 451px 451px;
+  column-gap: 30px;
+  row-gap: 30px;
 }
 
-.pagination li button.ant-pagination-item-link {
-  border: none;
-  min-width: 20px;
-  height: 20px;
+.ant-layout-content {
+  padding: 0px 15px 0 15px;
 }
 
-.ant-pagination-item-active {
-  background: #1890ff !important;
-  border-radius: 4px;
-  min-width: 22px;
-  height: 22px;
-  font-size: 12px;
+.input-wrapper {
+  width: 937px;
+  padding-bottom: 15px;
 }
 
-.ant-pagination-item-active a,
-.ant-pagination-item-active:link a,
-.ant-pagination-item-active:visited a,
-.ant-pagination-item-active:hover a,
-.ant-pagination-item-active:focus a {
-  color: #ffffff;
-  font-size: 12px;
-}
+@media screen and (max-width: 1028px) {
+  .wrapper {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-.ant-pagination-options {
-  display: none;
-}
+  .main {
+    width: 388px;
+    display: grid;
+    grid-template-columns: 388px;
+    column-gap: 30px;
+    row-gap: 30px;
+  }
 
-.ant-pagination-item-active a {
-  color: #ffffff !important;
+  .input-wrapper {
+    width: 388px;
+    padding-bottom: 15px;
+  }
 }

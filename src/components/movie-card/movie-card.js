@@ -1,82 +1,141 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable react/destructuring-assignment */
-import { Col, Image, Rate } from 'antd'
-import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React, { Component } from "react";
+import { Space, Spin, Typography, Image } from "antd";
+import { parseISO, format } from "date-fns";
 
-import Context from '../context/context'
-import './movie-card.css'
+import './movie-card.css';
+import AlertAlarm from "../alert-alarm";
+import MovieGenre from "../movie-genre";
+import Rating from "../rating";
+
+
+const { Title, Text, Paragraph } = Typography;
 
 export default class MovieCard extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props);
     this.state = {
-      currentRating: null,
-    }
-    this.imgBase = 'https://image.tmdb.org/t/p/w500'
+      hasError: false,
+      loading: true,
+    };
 
-    this.onMovieRateHandler = (value) => {
-      const { movieId, onMovieRate } = this.props
-      onMovieRate(value, movieId).then(() => this.setState({ currentRating: value }))
+    this.imgUrl = 'https://image.tmdb.org/t/p/w500'
+  }
+
+  onRatingChange = (e) => {
+    const { id, rateMovie } = this.props;
+    rateMovie(id, e);
+  };
+
+  dateConvert(release_date) {
+    if (release_date) {
+      try {
+        return format(parseISO(release_date), "MMMM dd, yyyy");
+      } catch (err) {
+        this.setState({ hasError: true });
+        throw new Error(`Incorrent date format "${err}"`);
+      }
     }
-    this.returnGenres = (genres) => {
-      const { title } = this.props
-      return genres.map(({ id, name }) => {
-        if (this.props.genreIds.find((genreId) => genreId === id)) {
-          return (
-            <span key={`${title}-${id}`} className="genre">
-              {name}
-            </span>
-          )
-        } else {
-          return null
-        }
-      })
-    }
-    this.ratedCircleColor = (voteAverage) => {
-      return voteAverage > 7 ? '#66E900' : voteAverage > 5 ? '#E9D100' : voteAverage > 3 ? '#E97E00' : 'E90000'
-    }
+    return null;
+  }
+
+  componentDidCatch(error, info) {
+    this.setState({
+      hasError: true,
+      error,
+      errorInfo: info,
+    });
+  }
+
+  componentDidMount() {
+    setTimeout(() => {
+      this.setState(() => {
+        return {
+          loading: false,
+        };
+      });
+    }, 150);
   }
 
   render() {
-    const { title, imgPath, description, releaseDate, voteAverage, rating } = this.props
-    const imgLink = this.imgBase + imgPath
-    const image = imgPath ? <Image width="100%" src={imgLink} alt={title} /> : null
+    const { id, original_title, release_date, genre_ids, overview, poster_path, vote_average, rateMovie, rating } =
+      this.props;
+
+    const { loading } = this.state;
+
+    const posterPreloader = (
+      <div className="card-preloader">
+        <Space direction="vertical">
+          <Space direction="horizontal">
+            <Spin tip="Loading" />
+          </Space>
+        </Space>
+      </div>
+    );
+
+    if (this.state.hasError) {
+      const { error, errorInfo } = this.state;
+      return (
+        <AlertAlarm
+          error={error ? error : "Error!"}
+          errorInfo={errorInfo ? errorInfo : null}
+        />
+      );
+    }
+
+    let borderColor;
+    if ((vote_average >= 0) & (vote_average < 3)) {
+      borderColor = "#E90000";
+    } else if ((vote_average >= 3) & (vote_average < 5)) {
+      borderColor = "#E97E00";
+    } else if ((vote_average >= 5) & (vote_average < 7)) {
+      borderColor = "#E9D100";
+    } else if (vote_average >= 7) {
+      borderColor = "#66E900";
+    }
+
 
     return (
-      <Col xs={24} md={12}>
-        <div className="single-movie">
-          <div className="single-movie__img">{image}</div>
-          <div className="single-movie__info">
-            <div className="single-movie__header">
-              <h5 className="single-movie__title">{title}</h5>
-              <div className="single-movie__date">{releaseDate}</div>
-              <div className="single-movie__genres">
-                <Context.Consumer>{(genres) => this.returnGenres(genres)}</Context.Consumer>
-              </div>
+      <div className="card">
+        <div className="cardImage">{loading ? posterPreloader : <Image src={ poster_path ? `${this.imgUrl}${poster_path}` : '/no_image.png'} />}</div>
+        <div className="cardTitleContainer">
+          <Title
+            level={2}
+            className="cardTitle"
+            ellipsis={{ ellipsis: false, expandable: false, rows: 2 }}
+          >
+            {original_title}
+            <div 
+            className="VoteAverage"
+            style={{ border: `2px solid ${borderColor}`}}>
+              { vote_average }
             </div>
-            <div className="single-movie__description">
-              <p>{description}</p>
-            </div>
-            <Rate
-              className="single-movie__stars"
-              count={10}
-              value={rating ? rating : this.state.currentRating}
-              onChange={(value) => this.onMovieRateHandler(value)}
-            />
-          </div>
-          <div style={{ borderColor: this.ratedCircleColor(voteAverage) }} className="single-movie__rate">
-            {voteAverage.toFixed(1)}
-          </div>
+          </Title>
+          <Text type="secondary">{release_date ? this.dateConvert(release_date) : null}</Text>
+          <MovieGenre
+            id={id}
+            genre_ids={genre_ids}
+            className="MovieGenre"
+          />
         </div>
-      </Col>
-    )
+        <div className="cardDescription">
+        <React.Fragment>
+            <Paragraph 
+            className="description"
+            ellipsis={{ ellipsis: false, expandable: false, rows: 5 }}
+            >
+              { overview }
+            </Paragraph>
+        </React.Fragment>
+        </div>
+        <div className="cardRating">
+          <Rating
+            id={id}
+            rateMovie={rateMovie}
+            rating={rating}
+            allowClear={false}
+          />
+        </div>
+      </div>
+    );
   }
-}
-
-MovieCard.propTypes = {
-  movieId: PropTypes.number.isRequired,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  voteAverage: PropTypes.number.isRequired,
 }

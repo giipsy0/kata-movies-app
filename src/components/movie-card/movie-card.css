@@ -1,131 +1,170 @@
-.ant-card-body {
-    padding: 0;
+.description {
+    font-size: 12px;
 }
 
-.movie-card {
-    display: flex;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-    height: 280px;
-    position: relative;
-    overflow: hidden;
-}
-
-.movie-card__img-wrapper {
-    height: 100%;
-    width: 330px;
-    overflow: hidden;
+.VoteAverage {
     display: flex;
     justify-content: center;
-    align-items: center
+    align-items: center;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 15px;
+    border-radius: 50%;
+    min-width: 10px;
+    min-height: 10px;
+    max-width: 35px;
+    max-height: 35px;
+    right: 5px;
+    top: 5px;
 }
 
-.movie-card__info {
-    padding: 12px 20px;
+.card { 
+    display: grid;
+    grid-template-columns: 185px 138px 128px;
+    grid-template-rows: 108px 134px 35px;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      "cardImage cardTitle cardTitle"
+      "cardImage cardDescription cardDescription"
+      "cardImage cardRating cardRating";
+      
+    box-shadow: 5px 5px 15px 0 #D9D9D9; 
+}
+  
+.cardImage { grid-area: cardImage; }
+  
+.cardTitleContainer {
+    grid-area: cardTitle;
+    padding: 12px 15px 0px 15px;
+}
+  
+.cardDescription {
+    grid-area: cardDescription;
+    padding: 15px;
+}
+  
+.cardRating {
+    grid-area: cardRating;
+    display: flex;
+    justify-content: center;
+    padding: 0px 5px 10px 5px;
+}
+
+.cardTitle {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: relative;
+    gap: 5px;
+    font-size: 20px;
+}
+  
+.card-preloader {
+    width: 185px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.card .ant-layout-header {
     display: flex;
     flex-direction: column;
-    flex-basis: 450px;
-    flex-grow: 2;
+    min-height: 76px;
+    padding: 12px 15px 0px 15px;
+    margin: 0px;
+    background-color: #fff0;
+    text-align: left;
+    line-height: 20px;
+    font-style: 12px;
 }
-
-.movie-card__title {
-    font-style: normal;
-    font-weight: 400;
-    font-size: 20px;
-    line-height: 28px;
-    margin-bottom: 6px;
-    color: #000000;
-    margin-right: 30px;
+  
+h2.ant-typography {
+    font-size: 16px;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    margin: 0px;
 }
-
-.movie_card__date {
-    font-style: normal;
-    font-weight: 400;
+  
+.ant-typography kbd {
+    margin: 0px;
+}
+  
+.card .ant-space-item {
+    height: 10px;
+}
+  
+.card .ant-rate {
+    font-size: 16px;
+}
+  
+.ant-typography-secondary {
     font-size: 12px;
-    line-height: 22px;
-    color: #827E7E;
-    margin-bottom: 8px;
 }
-
-.movie-card__genres {
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    margin-bottom: 4px;
+  
+.ant-layout .ant-layout-sider {
+    background-color: rgb(255, 255, 255);
 }
-
-
-
-.genre {
-    background: #FAFAFA;
-    border: 1px solid #D9D9D9;
-    border-radius: 2px;
-    font-size: 12px;
-    line-height: 15px;
-    color: rgba(0, 0, 0, 0.65);
-    padding: 3px 5px;
-    margin-right: 8px;
-    margin-bottom: 4px;
+  
+@media screen and (max-width: 1028px) {
+    
+aside .ant-layout-sider ant-layout-sider-dark, .ant-image {
+      width: 60px;
+      height: 91px;
 }
-
-.movie-card__description {
-    font-style: normal;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 22px;
+  
+.card {  display: grid;
+      grid-template-columns: 71px 185px 132px;
+      grid-template-rows: 103px 107px 34px;
+      grid-auto-rows: 1fr;
+      gap: 0px 0px;
+      grid-auto-flow: row;
+      grid-template-areas:
+        "cardImage cardTitle cardTitle"
+        "cardDescription cardDescription cardDescription"
+        "cardRating cardRating cardRating";
 }
-
-.movie-card__stars {
-    display: flex;
-    margin-top: auto;
-    margin-bottom: 5px;
+  
+.cardImage { grid-area: cardImage;
+    padding: 10px;
 }
-
-.movie-card__stars .ant-rate-star:not(:last-child) {
-    margin-right: auto;
+    
+.cardTitleContainer {
+      grid-area: cardTitle;
+      padding: 12px 15px 0px 15px;
 }
-
-.movie-card__rate {
-    box-sizing: border-box;
-    width: 30px;
-    height: 30px;
-    border: 2px solid #E9D100;
-    border-radius: 50%;
-    position: absolute;
-    top: 12px;
-    right: 8px;
-    font-size: 12px;
-    line-height: 26px;
-    text-align: center;
-    color: #000000;
+    
+.cardDescription {
+      grid-area: cardDescription;
+      padding: 10px;
 }
-
-@media (max-width: 991px) {
-    .movie-card__img-wrapper {
-        position: absolute;
-        top: 6px;
-        left: 10px;
-        width: 91px;
-        height: auto;
-    }
-
-    .movie-card__info {
-        padding: 10px;
-    }
-
-    .movie-card__header {
-        margin-left: 100px;
-        min-height: 140px;
-    }
-
-    .movie-card__stars {
-        margin-left: 25%;
-        margin-right: 5px;
-    }
+    
+.cardRating {
+      grid-area: cardRating;
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 15px 0 15px;
 }
-
-@media (max-width: 767px) {
-    .movie-card {
-        height: 250px;
-        max-width: 100%;
-    }
+    
+.card {
+      max-width: 454px;
+      width: 387px;
+      height: 245px;    
+      margin: 0px;
+      padding: 0px;
+      box-shadow: 5px 5px 15px 0 #D9D9D9; 
+}
+  
+.card-preloader {
+        width: 60px;
+        height: 90px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid rgba(7, 1, 110, 0.303);
+        padding-bottom: 25px;
+}
 }

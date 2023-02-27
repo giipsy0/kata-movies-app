@@ -1,149 +1,221 @@
-/* eslint-disable react/destructuring-assignment */
-import React, { Component } from 'react'
-import { Pagination } from 'antd'
-import { Offline } from 'react-detect-offline'
+import React, { Component } from 'react';
+import { debounce } from "lodash";
+import { Tabs } from "antd";
 
 import './app.css'
-import MovieList from '../movie-list/movie-list'
-import Header from '../header'
-import MovieService from '../../utilities/movie-service'
-import Context from '../context/context'
+import MovieList from '../movie-list/movie-list';
+import Footer from '../footer';
+import MovieService from '../../utilities/movie-service';
+import Context from '../context/context';
+import Search from '../search/search';
+import AlertAlarm from '../alert-alarm';
 
 export default class App extends Component {
   constructor(props) {
-    super(props)
+    super(props);
+    this.api = new MovieService();
+
     this.state = {
-      status: '',
-      data: null,
+      hasError: false,
+      loading: true,
+      tab: "search",
+      query: "",
       page: 1,
-      searchQuery: null,
-      total_results: 0,
-    }
-    this.movieService = new MovieService()
+      genres: "",
+      moviesList: [],
+      total_pages: "",
+      total_results: "",
+      items: [
+        {
+          key: "search",
+          label: "Search",
+        },
+        {
+          key: "rated",
+          label: "Rated",
+        },
+      ],
+    };
+  }
 
-    this.onSearch = (query) => {
-      if (query === '') {
-        this.setState({ data: null, status: '' })
-        return
-      }
-      const promise = new Promise((resolve) => {
-        this.setState({ status: 'loading', searchQuery: query })
-        resolve(this.movieService.getResources(query))
-      })
-      promise
-        .then(({ results, total_results, page }) => {
-          return {
-            results: results.map(this.movieService._transformMovieData),
-            total_results,
-            page,
-          }
-        })
-        .then(({ results, total_results, page }) => {
-          this.setState({
-            data: results ? results : [],
-            status: 'success',
-            total_results,
-            page,
-          })
-        })
-        .catch(() => {
-          this.setState({ status: 'error' })
-        })
-    }
+  handleSubmit = (e) => {
+    e.preventDefault();
+  };
 
-    this.onPaginationChange = (page) => {
-      const promise = new Promise((resolve) => {
-        this.setState({ status: 'loading' })
-        resolve(this.movieService.getResources(this.state.searchQuery, page))
-      })
-      promise
-        .then(({ results, page, total_results }) => ({
-          results: results.map(this.movieService._transformMovieData),
-          page,
-          total_results,
-        }))
-        .then(({ results, page, total_results }) => {
-          this.setState({
-            data: results,
-            status: 'success',
-            page,
-            total_results,
-          })
-        })
-        .catch(() => {
-          this.setState({ status: 'error' })
-        })
+  handleChange = (e) => {
+    const queryFromKeyBoard = e.target.value.trim();
+    this.setState(() => {
+      return {
+        query: e.target.value.trim(),
+        page: 1,
+      };
+    });
+    if (!queryFromKeyBoard) {
+      this.setState({
+        query: "",
+        page: 1,
+      });
     }
+  };
 
-    this.onMovieRate = async (value, movieId) => {
-      this.movieService.rateMovie(value, movieId)
-    }
+  onTabChange = (key) => {
+    this.setState(() => {
+      return {
+        tab: key,
+        page: 1,
+      };
+    });
+  };
 
-    this.onRatedTab = () => {
-      this.setState({ status: 'loading' })
-      this.movieService
-        .getRatedMovies()
-        .then(({ results, page, total_results }) => {
-          const newRes = results.map(this.movieService._transformMovieData)
-          this.setState({
-            data: newRes,
-            page,
-            total_results,
-            status: 'success',
-          })
-        })
-        .catch(() => {
-          this.setState({ status: 'error' })
-        })
+  updateGenres = async () => {
+    this.api.getGenres().then(this.onGenresLoaded).catch(this.onError);
+  };
+
+  onGenresLoaded = (genres) => {
+    this.setState(() => {
+      return {
+        genres,
+        loading: false,
+        hasError: false,
+      };
+    });
+  };
+
+  onMoviesLoaded = (moviesData) => {
+    const { page, total_pages, total_results } = moviesData;
+    this.setState(() => {
+      return {
+        page,
+        moviesList: moviesData,
+        total_pages,
+        total_results,
+        loading: false,
+        hasError: false,
+      };
+    });
+  };
+
+  onError = (err) => {
+    this.setState({
+      hasError: true,
+      error: err.name,
+      errorInfo: err.message,
+    });
+  };
+
+  updatePage = (query = "", pageNumber = 1) => {
+    this.setState({
+      loading: true,
+    });
+
+    const { tab = "search" } = this.state;
+
+    if (tab === "rated") {
+      this.setState({
+        query: "",
+      });
+      this.api.fetchAllRatedMovies(pageNumber).then(this.onMoviesLoaded).catch(this.onError);
+    } else if (query) {
+      const data = this.api.fetchSearchedMoviesAndRatingArrays(pageNumber, query);
+      this.api.getMoviesWithRating(data).then(this.onMoviesLoaded).catch(this.onError);
+    } else if (!query) {
+      const data = this.api.fetchPopularMoviesAndRatingArrays(pageNumber);
+      this.api.getMoviesWithRating(data).then(this.onMoviesLoaded).catch(this.onError);
     }
+  };
+
+  componentDidCatch(error, info) {
+    this.setState({
+      hasError: true,
+      error,
+      errorInfo: info,
+    });
   }
 
   componentDidMount() {
-    this.movieService
-      .createGuestSession()
-      .then(() => this.movieService.getGenres())
-      .then(({ genres }) => {
-        this.setState({ genres })
-      })
-      .catch(() => {
-        this.setState({ status: 'error' })
-      })
+    this.api.createNewGuestSession();
+    this.updateGenres();
+    this.setState({
+      loading: false,
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.query !== prevState.query) {
+      const { query, page } = this.state;
+      this.updatePage(query, page);
+    }
   }
 
   render() {
-    const { status, data } = this.state
-
-    const showPagination =
-      status === '' ? null : (
-        <Pagination
-          className="pagination"
-          current={this.state.page}
-          onChange={(num) => this.onPaginationChange(num)}
-          total={this.state.total_results}
-          pageSize={20}
-          showSizeChanger={false}
-          showLessItems
-          showQuickJumper={false}
-          showTotal={false}
-          hideOnSinglePage
+    if (this.state.hasError) {
+      const { error, errorInfo } = this.state;
+      return (
+        <AlertAlarm
+          error={error}
+          errorInfo={errorInfo ? errorInfo : null}
         />
-      )
+      );
+    }
+
+    let { genres } = this.state;
+    const rateMovie = this.api.rateMovie;
+    const { moviesList, query, page, total_results, loading, vote_average, tab } = this.state;
+    const debounced = debounce(this.handleChange, 500);
 
     return (
-      <div className="app">
-        <Header
-          onEdit={this.onEdit}
-          editInput={this.editInput}
-          searchQuery={this.searchQuery}
-          onSearch={this.onSearch}
-          onRatedTab={this.onRatedTab}
-        />
-        <Context.Provider value={this.state.genres}>
-          <MovieList data={data} status={status} onMovieRate={this.onMovieRate} />
-        </Context.Provider>
-        {showPagination}
-        <Offline>You are currently offline</Offline>
+      <div className="wrapper">
+        <div className="app">
+          <div className="header">
+            <Tabs
+              centered
+              defaultActiveKey="1"
+              items={this.state.items}
+              onChange={this.onTabChange}
+            />
+            {total_results >= 6 ? (
+              <div className="footer-wrapper">
+                <Footer
+                  query={query}
+                  page={page}
+                  total_results={total_results}
+                  updatePage={this.updatePage}
+                />
+              </div>
+            ) : null}
+            {tab === "search" ? (
+              <Search
+                handleSubmit={this.handleSubmit}
+                handleChange={debounced}
+              />
+            ) : null}
+          </div>
+          <div className="CardList">
+            <Context.Provider value={genres}>
+              <MovieList
+                moviesList={moviesList}
+                query={query}
+                page={page}
+                loading={loading}
+                updatePage={this.updatePage}
+                rateMovie={rateMovie}
+                vote_average={vote_average}
+                tab={tab}
+              />
+            </Context.Provider>
+          </div>
+          {total_results >= 20 ? (
+            <div className="footer-wrapper">
+              <Footer
+                query={query}
+                page={page}
+                total_results={total_results}
+                updatePage={this.updatePage}
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
-    )
+    );
   }
 }

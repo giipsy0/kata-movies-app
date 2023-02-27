@@ -1,90 +1,116 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/jsx-fragments */
-import { Alert, Row, Spin } from 'antd'
-import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React, { Component } from "react";
+import { Space, Spin } from "antd";
 
 import MovieCard from '../movie-card'
 import './movie-list.css'
+import AlertAlarm from "../alert-alarm";
 
-export default class MoviesList extends Component {
+export default class MovieList extends Component {
   constructor(props) {
-    super(props)
-    this.renderCards = () => {
-      const { data, onMovieRate } = this.props
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      loading: true,
+    };
+  }
 
-      return data.map(({ id, title, description, posterPath, releaseDate, genreIds, voteAverage, rating }) => {
+  componentDidCatch(error, info) {
+    this.setState({
+      hasError: true,
+      error,
+      errorInfo: info,
+    });
+  }
+
+  componentDidMount() {
+    this.setState(() => {
+      return {
+        loading: false,
+      };
+    });
+    const { query, page, updatePage } = this.props;
+    updatePage(query, page);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.tab !== this.props.tab) {
+      const { query, page, updatePage } = this.props;
+      updatePage(query, page);
+    }
+
+    if (prevProps.query !== this.props.query) {
+      const { query, page, updatePage } = this.props;
+      updatePage(query, page);
+    }
+
+    if (prevProps.page !== this.props.page) {
+      const { query, page, updatePage } = this.props;
+      updatePage(query, page);
+    }
+  }
+
+  renderCards = (movieArray) => {
+    const { rateMovie } = this.props;
+    if (!movieArray.results) return;
+    return movieArray.results.map(
+      ({ id, original_title, release_date, genre_ids, overview, poster_path, vote_average, rating }) => {
         return (
           <MovieCard
             key={id}
-            title={title}
-            description={description}
-            imgPath={posterPath}
-            releaseDate={releaseDate}
-            genreIds={genreIds}
-            voteAverage={voteAverage}
-            onMovieRate={onMovieRate}
-            movieId={id}
+            id={id}
+            original_title={original_title}
+            release_date={release_date}
+            genre_ids={genre_ids}
+            overview={overview}
+            poster_path={poster_path}
+            rateMovie={rateMovie}
+            vote_average={vote_average}
             rating={rating}
           />
-        )
-      })
-    }
-  }
+        );
+      }
+    );
+  };
 
   render() {
-    const { status, data } = this.props
-    if (data !== null && data.length === 0) {
+    if (this.state.hasError) {
+      const { error, errorInfo } = this.state;
       return (
-        <React.Fragment>
-          <Alert
-            message="Movies results: 0"
-            description="No movies were found within your search, try another"
-            type="info"
-            showIcon
-          />
-        </React.Fragment>
-      )
+        <AlertAlarm
+          error={error}
+          errorInfo={errorInfo ? errorInfo : null}
+        />
+      );
     }
-    switch (status) {
-      case 'error':
-        return <Alert message="Something went wrong" description="Can't get movies" type="error" showIcon />
-      case 'loading':
-        return <Spin size="large" />
-      case 'success':
-        return (
-          <Row gutter={[32, 32]} className="movies-list">
-            {this.renderCards()}
-          </Row>
-        )
-      default:
-        return
-    }
-  }
-}
-MoviesList.defaultProps = {
-  data: null,
-  status: 0,
-  onMovieRate: () => {},
-}
 
-MoviesList.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      releaseDate: PropTypes.string,
-      voteAverage: PropTypes.number.isRequired,
-      rating: PropTypes.number,
-      genres: PropTypes.arrayOf(
-        PropTypes.shape({
-          id: PropTypes.number.isRequired,
-          name: PropTypes.string.isRequired,
-        })
-      ),
-    })
-  ),
-  status: PropTypes.string,
-  onMovieRate: PropTypes.func,
+    const { loading } = this.props;
+
+    const cardListPreloader = (
+      <div className="cardList-preloader">
+        <Space direction="vertical">
+          <Space direction="horizontal">
+            <Spin tip="Loading" />
+          </Space>
+        </Space>
+      </div>
+    );
+
+    const { moviesList } = this.props;
+
+    const cards = this.renderCards(moviesList);
+    if (!loading & (typeof moviesList.results === "object")) {
+      if (moviesList.results.length === 0) {
+        return <div>Something went wrong</div>;
+      }
+    }
+
+    return (
+      <div className={loading ? null : "main"}>
+        {loading ? cardListPreloader : null}
+        {loading ? null : cards}
+      </div>
+    );
+  }
 }

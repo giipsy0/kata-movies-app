@@ -22,14 +22,8 @@
       "import"
   ],
   "rules": {
-      "import/order": [
-          2,
-          {
-            "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
-            "newlines-between": "always"
-          }
-          
-      ]
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": 0
   },
   "settings": {
       "react": {

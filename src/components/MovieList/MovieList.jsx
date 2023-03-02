@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Space, Spin } from "antd";
 
-import MovieCard from '../movie-card'
-import './movie-list.css'
-import AlertAlarm from "../alert-alarm";
+import MovieCard from '../MovieCard'
+import './MovieList.css'
+import AlertAlarm from "../AlertAlarm";
 
 export default class MovieList extends Component {
   constructor(props) {

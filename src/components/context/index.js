@@ -1,3 +1,3 @@
-import Context from './context'
+import Context from './Context'
 
 export default Context

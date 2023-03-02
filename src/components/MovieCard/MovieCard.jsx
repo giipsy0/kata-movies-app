@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import { Space, Spin, Typography, Image } from "antd";
 import { parseISO, format } from "date-fns";
 
-import './movie-card.css';
-import AlertAlarm from "../alert-alarm";
-import MovieGenre from "../movie-genre";
+import './MovieCard.css';
+import AlertAlarm from "../AlertAlarm";
+import MovieGenre from "../MovieGenre";
 import Rating from "../rating";
 
 
@@ -83,11 +83,11 @@ export default class MovieCard extends Component {
     }
 
     let borderColor;
-    if ((vote_average >= 0) & (vote_average < 3)) {
+    if ((vote_average >= 0) && (vote_average < 3)) {
       borderColor = "#E90000";
-    } else if ((vote_average >= 3) & (vote_average < 5)) {
+    } else if ((vote_average >= 3) && (vote_average < 5)) {
       borderColor = "#E97E00";
-    } else if ((vote_average >= 5) & (vote_average < 7)) {
+    } else if ((vote_average >= 5) && (vote_average < 7)) {
       borderColor = "#E9D100";
     } else if (vote_average >= 7) {
       borderColor = "#66E900";
@@ -95,7 +95,7 @@ export default class MovieCard extends Component {
 
 
     return (
-      <div className="card">
+      <section className="card">
         <div className="cardImage">{loading ? posterPreloader : <Image src={ poster_path ? `${this.imgUrl}${poster_path}` : '/no_image.png'} />}</div>
         <div className="cardTitleContainer">
           <Title
@@ -107,7 +107,7 @@ export default class MovieCard extends Component {
             <div 
             className="VoteAverage"
             style={{ border: `2px solid ${borderColor}`}}>
-              { vote_average }
+              { vote_average.toFixed(1) }
             </div>
           </Title>
           <Text type="secondary">{release_date ? this.dateConvert(release_date) : null}</Text>
@@ -135,7 +135,7 @@ export default class MovieCard extends Component {
             allowClear={false}
           />
         </div>
-      </div>
+      </section>
     );
   }
 }

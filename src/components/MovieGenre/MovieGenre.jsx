@@ -3,8 +3,8 @@ import { Typography } from "antd";
 
 const { Text } = Typography;
 
-import './movie-genre.css';
-import Context from "../context/context";
+import './MovieGenre.css';
+import Context from "../context/Context";
 
 export default class MovieGenre extends Component {
     constructor(props) {

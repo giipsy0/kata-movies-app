@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { debounce } from "lodash";
 import { Tabs } from "antd";
 
-import './app.css'
-import MovieList from '../movie-list/movie-list';
+import './App.css'
+import MovieList from '../MovieList/MovieList';
 import Footer from '../footer';
-import MovieService from '../../utilities/movie-service';
-import Context from '../context/context';
-import Search from '../search/search';
-import AlertAlarm from '../alert-alarm';
+import MovieService from '../../utilities/MovieService';
+import Context from '../context/Context';
+import Search from '../search/Search';
+import AlertAlarm from '../AlertAlarm';
 
 export default class App extends Component {
   constructor(props) {
@@ -42,21 +42,30 @@ export default class App extends Component {
     e.preventDefault();
   };
 
-  handleChange = (e) => {
-    const queryFromKeyBoard = e.target.value.trim();
-    this.setState(() => {
-      return {
-        query: e.target.value.trim(),
-        page: 1,
-      };
-    });
-    if (!queryFromKeyBoard) {
-      this.setState({
-        query: "",
-        page: 1,
-      });
+  // handleChange = (e) => {
+  //   const queryFromKeyBoard = e.target.value.trim();
+  //   this.setState(() => {
+  //     return {
+  //       query: e.target.value.trim(),
+  //       page: 1,
+  //     };
+  //   });
+  //   if (!queryFromKeyBoard) {
+  //     this.setState({
+  //       query: "",
+  //       page: 1,
+  //     });
+  //   }
+  // };
+  
+  handleChange = ({ target }) => {
+    const queryFromKeyBoard = target.value.trim() 
+    this.setState((prevState) => ({
+      query: target.value.trim(),
+      page: prevState.query === queryFromKeyBoard ? prevState.page : 1,
     }
-  };
+    ))
+  }
 
   onTabChange = (key) => {
     this.setState(() => {
@@ -165,31 +174,21 @@ export default class App extends Component {
 
     return (
       <div className="wrapper">
-        <div className="app">
-          <div className="header">
+        <section className="app">
+          <header className="header">
             <Tabs
               centered
               defaultActiveKey="1"
               items={this.state.items}
               onChange={this.onTabChange}
             />
-            {total_results >= 6 ? (
-              <div className="footer-wrapper">
-                <Footer
-                  query={query}
-                  page={page}
-                  total_results={total_results}
-                  updatePage={this.updatePage}
-                />
-              </div>
-            ) : null}
             {tab === "search" ? (
               <Search
                 handleSubmit={this.handleSubmit}
                 handleChange={debounced}
               />
             ) : null}
-          </div>
+          </header>
           <div className="CardList">
             <Context.Provider value={genres}>
               <MovieList
@@ -214,7 +213,7 @@ export default class App extends Component {
               />
             </div>
           ) : null}
-        </div>
+        </section>
       </div>
     );
   }
